@@ -1,8 +1,9 @@
 import { useState } from "react";
 import axios from "../core/axios";
 import { useNavigate } from "react-router-dom";
-import Alert from "../components/alert/Alert";
 import { Link } from "react-router-dom";
+import Alert from "../components/alert/Alert";
+import InputForm from "../components/common/InputForm";
 
 const Login = () => {
   const [phone, setPhone] = useState("");
@@ -40,6 +41,8 @@ const Login = () => {
     }
 
     try {
+      // await axios.get("/sanctum/csrf-cookie");   //if we use sanctum
+
       const response = await axios.post("/login", {
         //set the api
         phone,
@@ -47,7 +50,6 @@ const Login = () => {
       });
 
       if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
         setSuccess(true);
         setTimeout(() => {
           navigate(""); // set the route
@@ -58,79 +60,91 @@ const Login = () => {
     } catch (error) {
       console.error(error);
       setSuccess(false);
+      if (error.response && error.response.status === 401) {
+        setErrors({ password: "شماره موبایل یا رمز عبور اشتباه است" });
+      } else {
+        setErrors({ general: "خطایی رخ داده است. دوباره تلاش کنید." });
+      }
     }
   };
 
   return (
     <div className="flex flex-col justify-center items-center h-full py-12 sm:px-6 lg:px-8">
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
-        {success && <Alert message={"ورود موفقیت‌آمیز بود"} />}
-        {success === false && (
-          <Alert error={!success} errorMessage={"ورود ناموفق بود"} />
-        )}
+        <div className="mb-2">
+          {success && <Alert message={"ورود موفقیت‌آمیز بود"} />}
+          {errors.general && (
+            <Alert error={true} errorMessage={errors.general} />
+          )}
+        </div>
 
-        <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
+        <div className="bg-white px-6 py-8 shadow sm:rounded-lg sm:px-12">
+          <div class="text-center pb-6 text-xl text-[#442a7e]">
+            <h1>ورود به حساب کاربری</h1>
+          </div>
           <form onSubmit={handleSubmit}>
             <div className="space-y-6">
-              <div>
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  تلفن همراه
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="text"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="px-2 outline-none block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                  />
-                  {errors.phone && (
-                    <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-                  )}
-                </div>
-              </div>
+              <InputForm
+                label={"تلفن همراه*"}
+                errorMessage={errors.phone}
+                placeholder={"09130000000"}
+                onChange={(value) => setPhone(value)}
+                name={"phone"}
+                id={"phone"}
+                htmlFor={"phone"}
+                value={phone}
+                type={"text"}
+              />
 
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  رمز عبور
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="px-2 outline-none block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                  />
-                  {errors.password && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.password}
-                    </p>
-                  )}
-                </div>
-              </div>
+              <InputForm
+                label={"رمز عبور*"}
+                errorMessage={errors.password}
+                placeholder={"123456"}
+                onChange={(value) => setPassword(value)}
+                name={"password"}
+                id={"password"}
+                htmlFor={"password"}
+                value={password}
+                type={"password"}
+              />
 
               <button
                 type="submit"
-                className="flex w-full justify-center rounded-md bg-[#A700FE] px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="flex w-full justify-center rounded-md bg-[#A700FE] px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
               >
                 ورود
               </button>
             </div>
           </form>
 
-          <div className="mt-4 text-sm text-center text-blue-600 cursor-pointer">
-            <Link to={"/register"} className="">
-              ثبت نام
-            </Link>
+          <div className="flex flex-col items-center mt-6 text-sm text-gray-600">
+            <div className="flex space-y-2">
+              <p className="text-black font-medium">حساب کاربری ندارید؟</p>
+              <Link
+                to="/register"
+                className="text-[#8162c3] pr-2 hover:text-[#442a7e] transition-colors"
+              >
+                ثبت‌ نام
+              </Link>
+            </div>
+            <div className="flex justify-around w-100 items-center mt-6 text-sm ">
+              <div>
+                <Link
+                  to="/forgot-password"
+                  className="text-[#8162c3] pr-2 hover:text-[#442a7e] transition-colors"
+                >
+                  فراموشی رمز عبور
+                </Link>
+              </div>
+              <div>
+                <Link
+                  to="/login-sms"
+                  className="text-[#8162c3] pr-2 hover:text-[#442a7e] transition-colors"
+                >
+                  ورود با کد اعتبار سنجی
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>

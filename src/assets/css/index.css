@@ -1,7 +1,14 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: Vazir;
+  src: url("../fonts/Vazir/Vazir-Regular.ttf") format("truetype");
+  src: url("../fonts/Vazir/Vazir-Regular.eot") format("embedded-opentype");
+  src: url("../fonts/Vazir/Vazir-Regular.woff") format("woff");
+  src: url("../fonts/Vazir/Vazir-Regular.woff2") format("woff2");
+}
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Vazir, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   direction: rtl;
